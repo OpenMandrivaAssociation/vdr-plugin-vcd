@@ -2,7 +2,7 @@
 %define plugin	vcd
 %define name	vdr-plugin-%plugin
 %define version	0.7
-%define rel	13
+%define rel	14
 
 Summary:	VDR plugin: VideoCD Player
 Name:		%name
