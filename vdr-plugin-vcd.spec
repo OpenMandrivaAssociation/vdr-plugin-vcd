@@ -14,7 +14,6 @@ URL:		http://vdr.heiligenmann.de/
 Source:		http://vdr.heiligenmann.de/download/vdr-%plugin-%version.tar.bz2
 Patch0:		vdr-vcd-0.7-for-1.3.38.patch
 Patch1:		vdr-vcd-0.7-make-definitions.patch
-BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildRequires:	vdr-devel >= 1.4.1-6
 Requires:	vdr-abi = %vdr_abi
 Requires(post):	vdr-common
