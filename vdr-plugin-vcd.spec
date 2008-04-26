@@ -2,7 +2,7 @@
 %define plugin	vcd
 %define name	vdr-plugin-%plugin
 %define version	0.9
-%define rel	1
+%define rel	2
 
 Summary:	VDR plugin: VideoCD Player
 Name:		%name
@@ -10,10 +10,11 @@ Version:	%version
 Release:	%mkrel %rel
 Group:		Video
 License:	GPL
-URL:		http://vdr.heiligenmann.de/
-Source:		http://vdr.heiligenmann.de/download/vdr-%plugin-%version.tgz
+URL:		http://www.heiligenmann.de/vdr/vdr/plugins/vcd.html
+Source:		http://www.heiligenmann.de/vdr/download/vdr-%plugin-%version.tgz
+Patch0:		vcd-0.9-i18n-1.6.patch
 BuildRoot:	%{_tmppath}/%{name}-buildroot
-BuildRequires:	vdr-devel >= 1.4.1-6
+BuildRequires:	vdr-devel >= 1.6.0
 Requires:	vdr-abi = %vdr_abi
 Requires(post):	vdr-common
 
@@ -23,6 +24,8 @@ from within VDR (by Klaus Schmidinger).
 
 %prep
 %setup -q -n %plugin-%version
+%patch0 -p1
+%vdr_plugin_prep
 
 %vdr_plugin_params_begin %plugin
 # use DEV as the CD-ROM device
