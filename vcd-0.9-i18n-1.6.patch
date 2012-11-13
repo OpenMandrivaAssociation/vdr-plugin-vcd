@@ -1,0 +1,1757 @@
+
+This is a semi-automatically created i18n adaptation patch and may contain
+errors (such as missing translations). This should only be used as a
+temporary measure until the upstream plugin maintainer fixes the plugin
+properly according to the instructions in i18n-to-gettext.pl.
+
+Created for Mandriva Linux packaging by Anssi Hannula <anssi@mandriva.org>.
+
+
+Index: vcd-0.9/Makefile
+===================================================================
+--- vcd-0.9/Makefile
++++ vcd-0.9/Makefile	2008-04-25 12:15:46.000000000 +0300
+@@ -53,7 +53,7 @@
+ 
+ ### The object files (add further files here):
+ 
+-OBJS = $(PLUGIN).o functions.o i18n.o menu.o player.o viewer.o setup.o menucontrol.o psd.o psdcontrol.o
++OBJS = $(PLUGIN).o functions.o  menu.o player.o viewer.o setup.o menucontrol.o psd.o psdcontrol.o
+ 
+ ### Implicit rules:
+ 
+@@ -69,9 +69,34 @@
+ 
+ -include $(DEPFILE)
+ 
++### Internationalization (I18N):
++
++PODIR     = po
++LOCALEDIR = $(VDRDIR)/locale
++I18Npo    = $(wildcard $(PODIR)/*.po)
++I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
++I18Npot   = $(PODIR)/$(PLUGIN).pot
++
++%.mo: %.po
++	msgfmt -c -o $@ $<
++
++$(I18Npot): $(wildcard *.[ch] *.[ch]xx *.cc *.[ch]pp *.hh)
++	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<http://qa.mandriva.com/>' -o $@ $^
++
++%.po: $(I18Npot)
++	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
++	@touch $@
++
++$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	@mkdir -p $(dir $@)
++	cp $< $@
++
++.PHONY: i18n
++i18n: $(I18Nmsgs)
++
+ ### Targets:
+ 
+-all: libvdr-$(PLUGIN).so
++all: libvdr-$(PLUGIN).so i18n
+ 
+ libvdr-$(PLUGIN).so: $(OBJS)
+ 	$(CXX) $(CXXFLAGS) -shared $(OBJS) -o $@
+@@ -86,4 +111,5 @@
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
++	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
+Index: vcd-0.9/i18n.c
+===================================================================
+--- vcd-0.9/i18n.c
++++ vcd-0.9/i18n.c	2008-04-25 12:15:46.000000000 +0300
+@@ -1,269 +0,0 @@
+-/*
+- * i18n.c: Internationalization
+- *
+- * VCD Player plugin for VDR (the Video Disk Recorder)
+- * Copyright (C) 2002  Thomas Heiligenmann  <thomas@heiligenmann.de>
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software Foundation,
+- * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301 USA
+- *
+- * Italian translations provided by Gringo <vdr-italian@tiscali.it>
+- *
+- */
+-
+-
+-#include "i18n.h"
+-
+-const tI18nPhrase Phrases[] = {
+-  { "VideoCD",
+-    "VideoCD",
+-    "",
+-    "VideoCD",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Tracks",
+-    "Tracks",
+-    "",
+-    "Tracce",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "VideoCD SPI",
+-    "VideoCD SPI",
+-    "",
+-    "VideoCD SPI",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "SPI",
+-    "SPI",
+-    "",
+-    "SPI",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "No disc inserted",
+-    "Keine CD eingelegt",
+-    "",
+-    "Nessun disco inserito",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "No VideoCD detected",
+-    "Keine VideoCD erkannt",
+-    "",
+-    "Nessun VideoCD trovato",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "VCD",
+-    "VCD",
+-    "",
+-    "VCD",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Setup.VCD$Drive speed",
+-    "Laufwerkgeschwindigkeit",
+-    "",
+-    "Velocità lettore",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Setup.VCD$Broken mode",
+-    "Nicht standardkonform",
+-    "",
+-    "Mod. non standard",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Setup.VCD$Hide main menu entry",
+-    "Hauptmenüeintrag ausblenden",
+-    "",
+-    "Nascondi voce nel menu principale",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Setup.VCD$Play tracks continuously",
+-    "Tracks nacheinander abspielen",
+-    "",
+-    "Riproduci tracce in modo continuo",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Setup.VCD$Autostart replay",
+-    "Wiedergabe automatisch starten",
+-    "",
+-    "Riproduzione automatica all'avvio",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Setup.VCD$Play sequence replay",
+-    "Wiedergabe nach Sequenz",
+-    "",
+-    "Riproduci in sequenza",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-    "",
+-  },
+-  { "Eject",
+-    "Auswerfen",
+-    "Izvrzi",
+-    "Eject",
+-    "Eject",
+-    "Ejectar",
+-    "Ejection",
+-    "Eject",
+-    "Avaa",
+-    "Wyrzucenie",
+-    "Expulsar",
+-    "Exsagogi",
+-    "Mata ut",
+-    "Ejecteaza",
+-    "Kidobni",
+-    "Expulsar",
+-  },
+-  { NULL }
+-};
+-
+Index: vcd-0.9/i18n.h
+===================================================================
+--- vcd-0.9/i18n.h
++++ vcd-0.9/i18n.h	2008-04-25 12:15:46.000000000 +0300
+@@ -1,30 +0,0 @@
+-/*
+- * i18n.h: Internationalization
+- *
+- * VCD Player plugin for VDR (the Video Disk Recorder)
+- * Copyright (C) 2002  Thomas Heiligenmann  <thomas@heiligenmann.de>
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software Foundation,
+- * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301 USA
+- *
+- */
+-
+-#ifndef __VCD_I18N_H
+-#define __VCD_I18N_H
+-
+-#include <vdr/i18n.h>
+-
+-extern const tI18nPhrase Phrases[];
+-
+-#endif //__VCD_I18N_H
+Index: vcd-0.9/menu.c
+===================================================================
+--- vcd-0.9/menu.c
++++ vcd-0.9/menu.c	2008-04-25 12:15:46.000000000 +0300
+@@ -26,7 +26,7 @@
+ 
+ #include <vdr/interface.h>
+ #include <vdr/status.h>
+-#include "i18n.h"
++
+ #include "menu.h"
+ #include "functions.h"
+ #include "setup.h"
+Index: vcd-0.9/menucontrol.c
+===================================================================
+--- vcd-0.9/menucontrol.c
++++ vcd-0.9/menucontrol.c	2008-04-25 12:15:46.000000000 +0300
+@@ -26,7 +26,7 @@
+ 
+ #include <vdr/interface.h>
+ #include <vdr/status.h>
+-#include "i18n.h"
++
+ #include "menu.h"
+ #include "functions.h"
+ #include "setup.h"
+Index: vcd-0.9/psd.c
+===================================================================
+--- vcd-0.9/psd.c
++++ vcd-0.9/psd.c	2008-04-25 12:15:46.000000000 +0300
+@@ -21,7 +21,7 @@
+  */
+ 
+ 
+-#include "i18n.h"
++
+ #include "psd.h"
+ #include "psdcontrol.h"
+ 
+Index: vcd-0.9/psdcontrol.c
+===================================================================
+--- vcd-0.9/psdcontrol.c
++++ vcd-0.9/psdcontrol.c	2008-04-25 12:15:46.000000000 +0300
+@@ -27,7 +27,7 @@
+ 
+ #include <vdr/interface.h>
+ #include <vdr/status.h>
+-#include "i18n.h"
++
+ #include "functions.h"
+ #include "setup.h"
+ #include "psdcontrol.h"
+Index: vcd-0.9/setup.c
+===================================================================
+--- vcd-0.9/setup.c
++++ vcd-0.9/setup.c	2008-04-25 12:15:46.000000000 +0300
+@@ -22,7 +22,7 @@
+ 
+ #include <vdr/menuitems.h>
+ #include "setup.h"
+-#include "i18n.h"
++
+ 
+ cVcdSetupData VcdSetupData;
+ 
+Index: vcd-0.9/vcd.c
+===================================================================
+--- vcd-0.9/vcd.c
++++ vcd-0.9/vcd.c	2008-04-25 12:15:46.000000000 +0300
+@@ -25,7 +25,7 @@
+ #include <vdr/interface.h>
+ #include <vdr/plugin.h>
+ #include "functions.h"
+-#include "i18n.h"
++
+ #include "menu.h"
+ #include "menucontrol.h"
+ #include "psdcontrol.h"
+@@ -100,7 +100,7 @@
+ 
+ bool cPluginVcd::Start(void)
+ {
+-  RegisterI18n(Phrases);
++  
+   if (option_vcd)
+      vcd = new cVcd(option_vcd);
+   else
+Index: vcd-0.9/po/ca_ES.po
+===================================================================
+--- vcd-0.9/po/ca_ES.po
++++ vcd-0.9/po/ca_ES.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Expulsar"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/de_DE.po
+===================================================================
+--- vcd-0.9/po/de_DE.po
++++ vcd-0.9/po/de_DE.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr "VideoCD"
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr "Keine VideoCD erkannt"
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Auswerfen"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr "Tracks"
++
++#: menu.c:244
++msgid "SPI"
++msgstr "SPI"
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr "VCD"
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr "Laufwerkgeschwindigkeit"
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr "Nicht standardkonform"
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr "Hauptmenüeintrag ausblenden"
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr "Tracks nacheinander abspielen"
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr "Wiedergabe automatisch starten"
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr "Wiedergabe nach Sequenz"
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr "Keine CD eingelegt"
+Index: vcd-0.9/po/el_GR.po
+===================================================================
+--- vcd-0.9/po/el_GR.po
++++ vcd-0.9/po/el_GR.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-7\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Exsagogi"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/es_ES.po
+===================================================================
+--- vcd-0.9/po/es_ES.po
++++ vcd-0.9/po/es_ES.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Expulsar"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/fi_FI.po
+===================================================================
+--- vcd-0.9/po/fi_FI.po
++++ vcd-0.9/po/fi_FI.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Avaa"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/fr_FR.po
+===================================================================
+--- vcd-0.9/po/fr_FR.po
++++ vcd-0.9/po/fr_FR.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Ejection"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/hu_HU.po
+===================================================================
+--- vcd-0.9/po/hu_HU.po
++++ vcd-0.9/po/hu_HU.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Kidobni"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/it_IT.po
+===================================================================
+--- vcd-0.9/po/it_IT.po
++++ vcd-0.9/po/it_IT.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr "VideoCD"
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr "Nessun VideoCD trovato"
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Eject"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr "Tracce"
++
++#: menu.c:244
++msgid "SPI"
++msgstr "SPI"
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr "VCD"
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr "Velocità lettore"
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr "Mod. non standard"
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr "Nascondi voce nel menu principale"
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr "Riproduci tracce in modo continuo"
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr "Riproduzione automatica all'avvio"
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr "Riproduci in sequenza"
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr "Nessun disco inserito"
+Index: vcd-0.9/po/nl_NL.po
+===================================================================
+--- vcd-0.9/po/nl_NL.po
++++ vcd-0.9/po/nl_NL.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Eject"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/nn_NO.po
+===================================================================
+--- vcd-0.9/po/nn_NO.po
++++ vcd-0.9/po/nn_NO.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Eject"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/pl_PL.po
+===================================================================
+--- vcd-0.9/po/pl_PL.po
++++ vcd-0.9/po/pl_PL.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Wyrzucenie"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/pt_PT.po
+===================================================================
+--- vcd-0.9/po/pt_PT.po
++++ vcd-0.9/po/pt_PT.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Ejectar"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/ro_RO.po
+===================================================================
+--- vcd-0.9/po/ro_RO.po
++++ vcd-0.9/po/ro_RO.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Ejecteaza"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/sl_SI.po
+===================================================================
+--- vcd-0.9/po/sl_SI.po
++++ vcd-0.9/po/sl_SI.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-2\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Izvrzi"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/sv_SE.po
+===================================================================
+--- vcd-0.9/po/sv_SE.po
++++ vcd-0.9/po/sv_SE.po	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,76 @@
++# VDR vcd plugin language source file.
++# Copyright (C) YEAR THE VDR-vcd'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-vcd package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-vcd\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: 2008-04-25 12:15+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-1\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr "Mata ut"
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
+Index: vcd-0.9/po/vcd.pot
+===================================================================
+--- vcd-0.9/po/vcd.pot
++++ vcd-0.9/po/vcd.pot	2008-04-25 12:15:46.000000000 +0300
+@@ -0,0 +1,77 @@
++# SOME DESCRIPTIVE TITLE.
++# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the PACKAGE package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++#, fuzzy
++msgid ""
++msgstr ""
++"Project-Id-Version: PACKAGE VERSION\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-25 12:15+0300\n"
++"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: LANGUAGE <LL@li.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=CHARSET\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: menu.c:40 psd.c:75
++msgid "VideoCD"
++msgstr ""
++
++#: menu.c:67 psd.c:92 vcd.c:173
++msgid "No VideoCD detected"
++msgstr ""
++
++#: menu.c:91 psd.c:97
++msgid "Eject"
++msgstr ""
++
++#: menu.c:146 menu.c:242 psd.c:95
++msgid "Key$Play"
++msgstr ""
++
++#: menu.c:148
++msgid "Tracks"
++msgstr ""
++
++#: menu.c:244
++msgid "SPI"
++msgstr ""
++
++#: menucontrol.c:269
++msgid "Jump: "
++msgstr ""
++
++#: setup.c:48
++msgid "VCD"
++msgstr ""
++
++#: setup.c:49
++msgid "Setup.VCD$Drive speed"
++msgstr ""
++
++#: setup.c:50
++msgid "Setup.VCD$Broken mode"
++msgstr ""
++
++#: setup.c:51
++msgid "Setup.VCD$Hide main menu entry"
++msgstr ""
++
++#: setup.c:52
++msgid "Setup.VCD$Play tracks continuously"
++msgstr ""
++
++#: setup.c:53
++msgid "Setup.VCD$Autostart replay"
++msgstr ""
++
++#: setup.c:54
++msgid "Setup.VCD$Play sequence replay"
++msgstr ""
++
++#: vcd.c:181
++msgid "No disc inserted"
++msgstr ""
