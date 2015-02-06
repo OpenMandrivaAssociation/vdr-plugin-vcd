@@ -3,7 +3,7 @@
 Summary:	VDR plugin: VideoCD Player
 Name:		vdr-plugin-%plugin
 Version:	0.9
-Release:	6
+Release:	7
 Group:		Video
 License:	GPL
 URL:		http://www.heiligenmann.de/vdr/vdr/plugins/vcd.html
