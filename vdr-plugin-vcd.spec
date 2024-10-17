@@ -6,7 +6,7 @@ Version:	0.9
 Release:	8
 Group:		Video
 License:	GPL
-URL:		http://www.heiligenmann.de/vdr/vdr/plugins/vcd.html
+URL:		https://www.heiligenmann.de/vdr/vdr/plugins/vcd.html
 Source:		http://www.heiligenmann.de/vdr/download/vdr-%plugin-%version.tgz
 Patch0:		vcd-0.9-i18n-1.6.patch
 BuildRequires:	vdr-devel >= 1.6.0
